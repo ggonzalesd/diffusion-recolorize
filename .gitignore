@@ -1,0 +1,11 @@
+__pycache__/
+dataset/
+output/
+postprocessing/
+
+*.zip
+
+*.pt
+
+*.ipynb
+!workflow.ipynb
