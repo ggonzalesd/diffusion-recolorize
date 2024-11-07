@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from m_convolutional import Convolutional
 from m_down import DownBlock
 from m_up import UpBlock
-from m_attention import Attention
+from m_selfattention import SelfAttention
 
 class UNet(nn.Module):
   def __init__(self, embedding:int=256, device='cpu', dtype=torch.float32):
@@ -24,22 +24,22 @@ class UNet(nn.Module):
     self.down1 = DownBlock(
       in_ch=64, out_ch=128, step_embedding=embedding, **factory_kwargs
     )
-    self.sa1 = Attention(
-      d_model=128, heads=16, layers=1, splits=8, spacing=2, size_emb=embedding, **factory_kwargs
+    self.sa1 = SelfAttention(
+      d_model=128, heads=16, layers=4, splits=1, spacing=1, reduction=2, size_emb=embedding, **factory_kwargs
     )
 
     self.down2 = DownBlock(
       in_ch=128, out_ch=256, step_embedding=embedding, **factory_kwargs
     )
-    self.sa2 = Attention(
-      d_model=256, heads=32, layers=1, splits=4, spacing=4, size_emb=embedding, **factory_kwargs
+    self.sa2 = SelfAttention(
+      d_model=256, heads=32, layers=4, splits=1, spacing=1, reduction=1, size_emb=embedding, **factory_kwargs
     )
 
     self.down3 = DownBlock(
       in_ch=256, out_ch=256, step_embedding=embedding, **factory_kwargs
     )
-    self.sa3 = Attention(
-      d_model=256, heads=32, layers=1, splits=2, spacing=8, size_emb=embedding, **factory_kwargs
+    self.sa3 = SelfAttention(
+      d_model=256, heads=32, layers=4, splits=1, spacing=1, reduction=0, size_emb=embedding, **factory_kwargs
     )
 
     self.bot1 = Convolutional(256, 512, **factory_kwargs)
@@ -49,22 +49,22 @@ class UNet(nn.Module):
     self.up1 = UpBlock(
       in_ch=256 + 256, out_ch=256, step_embedding=embedding, **factory_kwargs
     )
-    self.sa4 = Attention(
-      d_model=256, heads=32, layers=1, splits=2, spacing=4, size_emb=embedding, **factory_kwargs
+    self.sa4 = SelfAttention(
+      d_model=256, heads=32, layers=4, splits=1, spacing=1, reduction=1, size_emb=embedding, **factory_kwargs
     )
 
     self.up2 = UpBlock(
       in_ch=128 + 2 * 128, out_ch=128, step_embedding=embedding, **factory_kwargs
     )
-    self.sa5 = Attention(
-      d_model=128, heads=16, layers=1, splits=4, spacing=2, size_emb=embedding, **factory_kwargs
+    self.sa5 = SelfAttention(
+      d_model=128, heads=32, layers=4, splits=1, spacing=1, reduction=2, size_emb=embedding, **factory_kwargs
     )
 
     self.up3 = UpBlock(
       in_ch=64 + 2*64, out_ch=64, step_embedding=embedding, **factory_kwargs
     )
-    self.sa6 = Attention(
-      d_model=64, heads=8, layers=1, splits=8, spacing=1, size_emb=embedding, **factory_kwargs
+    self.sa6 = SelfAttention(
+      d_model=64, heads=16, layers=4, splits=1, spacing=1, reduction=3, size_emb=embedding, **factory_kwargs
     )
 
     self.out = nn.Conv2d(64, 3, 1, bias=False, **factory_kwargs)
