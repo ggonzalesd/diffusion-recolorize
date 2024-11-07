@@ -31,7 +31,8 @@ class UpBlock(nn.Module):
   def forward(self, X:Tensor, step:Tensor, skip:Tensor, src:Tensor) -> Tensor:
     X = self.up(X)
 
-    X[:,::2,:,:] += src
+    if src is not None:
+      X[:,::2,:,:] += src
     X = torch.cat([skip, X], dim=1)
     X = self.conv(X)
 

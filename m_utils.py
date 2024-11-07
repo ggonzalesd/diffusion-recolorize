@@ -71,3 +71,31 @@ def noise_image(X:Tensor, t:Tensor, s:tuple[Tensor, Tensor, Tensor], device='cpu
 
 def sample_timesteps(n: int, steps:int=1000, device='cpu') -> Tensor:
   return torch.randint(low=1, high=steps, size=(n,), device=device)
+
+def batch_image_to_batch_sequential(X:Tensor) -> Tensor:
+  sw, sh = X.shape[-2], X.shape[-1]
+  return X.view(X.shape[0], X.shape[1], -1).swapaxes(-1, 1), sw, sh
+
+def batch_sequential_to_batch_image(X:Tensor, sw:int, sh:int) -> Tensor:
+  return X.swapaxes(-1, 1).view(X.shape[0], X.shape[-1], sw, sh)
+
+if __name__ == '__main__':
+  import os, glob
+  from PIL import Image
+  import numpy as np
+  import torch
+
+  import matplotlib.pyplot as plt
+
+  image = Image.open('postprocessing/img-0.jpg').convert('RGB')
+  image = torch.Tensor(np.array(image, dtype=np.float32) / 255).unsqueeze(0).moveaxis(-1, 1)
+
+  sequence = image.view(1, 3, -1).swapaxes(-1, 1)
+
+  restore = sequence.swapaxes(-1, 1).view(1, 3, 128, 128)
+
+  plt.subplot(1, 2, 1)
+  plt.imshow(image[0, :3].moveaxis(0, -1).detach().cpu().numpy())
+  plt.subplot(1, 2, 2)
+  plt.imshow(restore[0, :3].moveaxis(0, -1).detach().cpu().numpy())
+  plt.show()

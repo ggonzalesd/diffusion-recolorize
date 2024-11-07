@@ -20,7 +20,7 @@ class Recolorate(nn.Module):
     self.step_emb = StepEmbedding(embedding, steps, **factory_kwargs)
     self.unet = UNet(embedding, **factory_kwargs)
 
-  def __call__(self, X:Tensor, t:Tensor, src:Tensor) -> Tensor:
+  def __call__(self, X:Tensor, t:Tensor, src:Tensor=None) -> Tensor:
     return super().__call__(X, t, src)
 
   def forward(self, X:Tensor, t:Tensor, src:Tensor) -> Tensor:

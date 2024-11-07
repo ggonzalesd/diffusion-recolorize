@@ -27,8 +27,9 @@ class DownBlock(nn.Module):
   def __call__(self, X:Tensor, step:Tensor, src:Tensor=None) -> Tensor:
     return super().__call__(X, step, src)
 
-  def forward(self, X:Tensor, step:Tensor, src:Tensor=None) -> Tensor:
-    X[:,::2,:,:] += src
+  def forward(self, X:Tensor, step:Tensor, src:Tensor) -> Tensor:
+    if src is not None:
+      X[:,::2,:,:] += src
     X = self.conv(X)
 
     step_emb = self.step_emb(self.active_fn(step))[:, :, None, None]\

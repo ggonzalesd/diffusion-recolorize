@@ -69,26 +69,26 @@ class UNet(nn.Module):
 
     self.out = nn.Conv2d(64, 3, 1, bias=False, **factory_kwargs)
 
-  def __call__(self, X:Tensor, step:Tensor, s:tuple[Tensor, Tensor], src:Tensor) -> Tensor:
+  def __call__(self, X:Tensor, step:Tensor, s:tuple[Tensor, Tensor], src:Tensor=None) -> Tensor:
     return super().__call__(X, step, s, src)
 
   def forward(self, X:Tensor, step:Tensor, s:tuple[Tensor, Tensor], src:Tensor) -> Tensor:
     Z1 = self.inc1(X) # 64 128 128
     Z2 = self.down1(Z1, step, src) # 128 64 64
     Z2 = self.sa1(Z2, s) + Z2 # 128 64 64
-    Z3 = self.down2(Z2, step, F.max_pool2d(src, 2)) # 256 32 32
+    Z3 = self.down2(Z2, step, F.max_pool2d(src, 2) if src is not None else None) # 256 32 32
     Z3 = self.sa2(Z3, s) + Z3 # 256 32 32
-    Z4 = self.down3(Z3, step, F.max_pool2d(src, 4)) # 256 16 16
+    Z4 = self.down3(Z3, step, F.max_pool2d(src, 4) if src is not None else None) # 256 16 16
     Z4 = self.sa3(Z4, s) + Z4 # 256 16 16
 
     A = self.bot1(Z4) # 256 16 16
     A = self.bot2(A) # 256 16 16
     A = self.bot3(A) # 256 16 16
 
-    A = self.up1(A, step, Z3, F.max_pool2d(src, 4)) # 256 32 32
+    A = self.up1(A, step, Z3, F.max_pool2d(src, 4) if src is not None else None) # 256 32 32
     A = self.sa4(A, s) + A # 256 32 32
 
-    A = self.up2(A, step, Z2, F.max_pool2d(src, 2)) # 128 64 64
+    A = self.up2(A, step, Z2, F.max_pool2d(src, 2) if src is not None else None) # 128 64 64
     A = self.sa5(A, s) + A
 
     A = self.up3(A, step, Z1, src) # 64 128 128
