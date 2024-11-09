@@ -23,14 +23,16 @@ class SelfAttention(nn.Module):
 
     downs = []
     for _ in range(reduction):
-      downs.append(nn.Conv2d(d_model, d_model, 5, 2, 2, bias=False))
-      downs.append(nn.BatchNorm2d(d_model))
+      downs.append(nn.Conv2d(d_model, d_model, 3, 1, 1, bias=False))
+      downs.append(nn.GroupNorm(1, d_model, **factory_kwargs))
+      downs.append(nn.MaxPool2d(2))
     self.downs = nn.ModuleList(downs) if reduction > 0 else []
 
     ups = []
     for _ in range(reduction):
-      ups.append(nn.ConvTranspose2d(d_model, d_model, 5, 2, 2, 1, bias=False))
-      ups.append(nn.BatchNorm2d(d_model))
+      ups.append(nn.Upsample(scale_factor=2, mode='nearest'))
+      ups.append(nn.Conv2d(d_model, d_model, 3, 1, 1, bias=False))
+      ups.append(nn.GroupNorm(1, d_model, **factory_kwargs))
     self.ups = nn.ModuleList(ups) if reduction > 0 else []
 
     self.encoder = nn.TransformerEncoder(
@@ -62,7 +64,7 @@ class SelfAttention(nn.Module):
     # Reduce Size of Image
     for index, down in enumerate(self.downs):
       X:Tensor = down(X)
-      if index % 2 == 1:
+      if index % 3 == 1:
         X:Tensor = self.active_fn(X)
 
     # Space Embedding
@@ -91,7 +93,7 @@ class SelfAttention(nn.Module):
     # Reisze Image
     for index, up in enumerate(self.ups):
       X:Tensor = up(X)
-      if index % 2 == 1:
+      if index % 3 == 2:
         X:Tensor = self.active_fn(X)
 
     X[:, ::2, :, :] += Z[:, ::2, :, :]
