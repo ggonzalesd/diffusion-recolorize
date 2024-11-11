@@ -64,7 +64,7 @@ class UNet(nn.Module):
       in_ch=64 + 2*64, out_ch=64, step_embedding=embedding, **factory_kwargs
     )
     self.sa6 = PathAttention(
-      channels=64, d_model=128, heads=4, layers=2, splits=8, spacing=1, size_emb=embedding, **factory_kwargs
+      channels=64, d_model=64, heads=4, layers=2, splits=8, spacing=1, size_emb=embedding, **factory_kwargs
     )
 
     self.out = nn.Conv2d(64, 3, 1, 1, bias=False, **factory_kwargs)
