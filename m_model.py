@@ -16,7 +16,7 @@ class Recolorate(nn.Module):
     }
     super().__init__()
 
-    self.space_emb = SpaceEmbedding(embedding, (16, 16), **factory_kwargs)
+    self.space_emb = SpaceEmbedding(embedding, (w_size, h_size), **factory_kwargs)
     self.step_emb = StepEmbedding(embedding, steps, **factory_kwargs)
     self.unet = UNet(embedding, **factory_kwargs)
 
@@ -31,3 +31,14 @@ class Recolorate(nn.Module):
     X = self.unet(X, step, space, src)
 
     return X
+
+if __name__ == '__main__':
+  X = torch.randn(1, 3, 128, 128)
+  src = X.mean(dim=1, keepdim=True)
+  t = torch.randint(low=0, high=1000, size=(1,))
+
+  model = Recolorate()
+
+  predicted = model(X, t, src)
+
+  print(predicted.shape)

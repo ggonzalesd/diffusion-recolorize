@@ -79,6 +79,20 @@ def batch_image_to_batch_sequential(X:Tensor) -> Tensor:
 def batch_sequential_to_batch_image(X:Tensor, sw:int, sh:int) -> Tensor:
   return X.swapaxes(-1, 1).view(X.shape[0], X.shape[-1], sw, sh)
 
+def image_to_sequential_features(X:Tensor, splits:int) -> tuple[Tensor, tuple[int, int], int]:
+  batch, features, dh, dw = X.shape
+  ph, pw = dh // splits, dw // splits
+  X = X.view(batch, features, splits, ph, splits, pw)
+  #   SIZE      B  dH dW sH sW C
+  X = X.permute(0, 3, 5, 2, 4, 1)
+  return X.reshape(batch, ph * pw, splits * splits * features), (ph, pw), features
+
+def sequential_features_to_image(X:Tensor, splits:int, p_size:tuple[int, int], features:int) -> Tensor:
+  ph, pw = p_size
+  X = X.view(X.shape[0], ph, pw, splits, splits, features)
+  X = X.permute(0, 5, 3, 1, 4, 2)
+  return X.reshape(X.shape[0], features, splits * ph, splits * pw)
+
 if __name__ == '__main__':
   import os, glob
   from PIL import Image
