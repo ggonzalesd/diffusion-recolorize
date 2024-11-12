@@ -72,7 +72,7 @@ class PathAttention(nn.Module):
     X:Tensor = self.active_fn(self.out_projection(X))
     X = sequential_features_to_image(X, self.splits, ss, features)
 
-    # X[:, ::2, :, :] += Z[:, ::2, :, :]
+    X[:, ::2, :, :] += Z[:, ::2, :, :]
 
     return X
 
