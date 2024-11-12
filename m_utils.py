@@ -56,7 +56,7 @@ def cosine_scheduler(steps:int=1000, device='cpu', dtype=torch.float32):
   t = torch.linspace(0, steps, steps + 1, device=device, dtype=dtype)
   alpha_hat = torch.cos((t / steps + s) / (1 + s) * math.pi * 0.5) ** 2
   alpha_hat = alpha_hat / alpha_hat[0]
-  beta = torch.clamp(1.0 - (alpha_hat[1:] / alpha_hat[:-1]), 0.0001, 0.9999)
+  beta = torch.clamp(1.0 - (alpha_hat[1:] / alpha_hat[:-1]), 0.0001, 0.999)
   alpha = 1.0 - beta
 
   return alpha, beta, alpha_hat
