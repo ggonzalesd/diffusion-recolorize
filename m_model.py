@@ -37,7 +37,7 @@ if __name__ == '__main__':
   src = X.mean(dim=1, keepdim=True)
   t = torch.randint(low=0, high=1000, size=(1,))
 
-  model = Recolorate()
+  model = Recolorate(1000, 256, 8, 8)
 
   predicted = model(X, t, src)
 
